@@ -17,6 +17,10 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
 
+/**
+ * Class that load a war file
+ * @author Luis Manuel Amengual
+ */
 public class WarLauncher {
 
     private static final String START_CLASS_ATTRIBUTE_NAME = "Start-Class";
@@ -122,6 +126,10 @@ public class WarLauncher {
         }
     }
 
+    /**
+     * Deletes a directory and all of the files inside it
+     * @param file File to delete
+     */
     private static void deleteDir(File file) {
         File[] contents = file.listFiles();
         if (contents != null) {

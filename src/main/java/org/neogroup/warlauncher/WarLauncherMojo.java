@@ -18,6 +18,10 @@ import java.util.jar.Attributes;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
 
+/**
+ * Mojo to repackage a war file and make it executable
+ * @author Luis Manuel Amengual
+ */
 @Mojo(name = "repackage", defaultPhase = LifecyclePhase.PACKAGE, requiresProject = true, threadSafe = true, requiresDependencyResolution = ResolutionScope.COMPILE_PLUS_RUNTIME, requiresDependencyCollection = ResolutionScope.COMPILE_PLUS_RUNTIME)
 public class WarLauncherMojo extends AbstractMojo {
 
@@ -32,6 +36,10 @@ public class WarLauncherMojo extends AbstractMojo {
     @Parameter(property = "startClass", required = true)
     private String startClass;
 
+    /**
+     * Executes the mojo
+     * @throws MojoExecutionException
+     */
     public void execute() throws MojoExecutionException {
 
         try {

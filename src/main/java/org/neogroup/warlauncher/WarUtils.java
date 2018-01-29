@@ -9,8 +9,17 @@ import java.util.jar.JarFile;
 import java.util.jar.JarOutputStream;
 import java.util.jar.Manifest;
 
+/**
+ * Utilities for war files
+ * @author Luis Manuel Amengual
+ */
 public abstract class WarUtils {
 
+    /**
+     * Unpacks a war file
+     * @param warFile War file to unpack
+     * @param warFolder Destination folder for the war file contents
+     */
     public static void unpackWarFile(File warFile, Path warFolder) {
 
         try {
@@ -43,10 +52,21 @@ public abstract class WarUtils {
         }
     }
 
+    /**
+     * Packs a folder into a war file
+     * @param warFile Destination War file
+     * @param warFolder Folder to pack
+     */
     public static void packWarFile(File warFile, Path warFolder) {
         packWarFile(warFile, warFolder, null);
     }
 
+    /**
+     * Packs a folder into a war file
+     * @param warFile Destination War file
+     * @param warFolder Folder to pack
+     * @param manifest Manifest that will be used in the war file
+     */
     public static void packWarFile(File warFile, Path warFolder, Manifest manifest) {
 
         try {
@@ -68,6 +88,14 @@ public abstract class WarUtils {
         }
     }
 
+    /**
+     * Adds a new jar entry to the war
+     * @param warFolder Base war folder
+     * @param source source file to copy
+     * @param target target outputstream of the jar
+     * @param excludeManifest exclude or not a manifest file
+     * @throws IOException
+     */
     private static void addJarEntry(Path warFolder, File source, JarOutputStream target, boolean excludeManifest) throws IOException {
 
         BufferedInputStream in = null;
