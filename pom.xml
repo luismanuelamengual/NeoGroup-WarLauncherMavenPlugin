@@ -6,7 +6,7 @@
 
     <groupId>com.github.luismanuelamengual</groupId>
     <artifactId>warlauncher-maven-plugin</artifactId>
-    <version>1.0.1</version>
+    <version>1.0.2</version>
     <name>War Launcher Maven Plugin</name>
     <packaging>maven-plugin</packaging>
     <description>Maven plugin to make executable war files</description>
