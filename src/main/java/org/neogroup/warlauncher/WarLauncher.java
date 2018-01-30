@@ -23,9 +23,11 @@ import java.util.jar.Manifest;
  */
 public class WarLauncher {
 
-    private static final String START_CLASS_ATTRIBUTE_NAME = "Start-Class";
-    private static final String WAR_FILE_PARAMETER_NAME = "web.filename";
-    private static final String WEB_ROOT_PARAMETER_NAME = "web.dir";
+    public static final String START_CLASS_ATTRIBUTE_NAME = "Start-Class";
+    public static final String WEB_ROOT_ATTRIBUTE_NAME = "Web-Root-Attribute";
+    public static final String WAR_FILE_ATTRIBUTE_NAME = "War-File-Attribute";
+    public static final String DEFAULT_WEB_ROOT_PARAMETER_NAME = "web.dir";
+    public static final String DEFAULT_WAR_FILE_PARAMETER_NAME = "web.filename";
 
     public static void main(String[] args) throws Exception {
 
@@ -104,19 +106,32 @@ public class WarLauncher {
             URLClassLoader urlClassLoader = new URLClassLoader (classPathUrls.toArray(new URL[0]), WarLauncher.class.getClassLoader());
 
             String startClassName = null;
+            String webRootParameterName = null;
+            String warFileParameterName = null;
             URL manifestResource = WarLauncher.class.getClassLoader().getResource("META-INF/MANIFEST.MF");
             try (InputStream inputStream = manifestResource.openStream()) {
                 Manifest manifest = new Manifest(inputStream);
                 Attributes attributes = manifest.getMainAttributes();
                 startClassName = attributes.getValue (START_CLASS_ATTRIBUTE_NAME);
+
+                if (startClassName == null) {
+                    throw new Exception (MessageFormat.format("Manifest attribute \"{0}\" not found !!", START_CLASS_ATTRIBUTE_NAME));
+                }
+
+                webRootParameterName = manifest.getMainAttributes().getValue(WEB_ROOT_ATTRIBUTE_NAME);
+                if (webRootParameterName == null) {
+                    webRootParameterName = DEFAULT_WEB_ROOT_PARAMETER_NAME;
+                }
+
+                warFileParameterName = manifest.getMainAttributes().getValue(WAR_FILE_ATTRIBUTE_NAME);
+                if (warFileParameterName == null) {
+                    warFileParameterName = DEFAULT_WAR_FILE_PARAMETER_NAME;
+                }
             }
 
-            if (startClassName == null) {
-                throw new Exception (MessageFormat.format("Manifest attribute \"{0}\" not found !!", START_CLASS_ATTRIBUTE_NAME));
-            }
+            System.setProperty(webRootParameterName, warFolderPath.toString());
+            System.setProperty(warFileParameterName, warFilename);
 
-            System.setProperty(WAR_FILE_PARAMETER_NAME, warFilename);
-            System.setProperty(WEB_ROOT_PARAMETER_NAME, warFolderPath.toString());
             Class mainClass = Class.forName(startClassName, true, urlClassLoader);
             Method method = mainClass.getDeclaredMethod("main", String[].class);
             method.invoke(null, new Object[]{new String[]{MessageFormat.format("--warFile={0}", warFilename), MessageFormat.format("--webRoot={0}", warFolderPath)}});

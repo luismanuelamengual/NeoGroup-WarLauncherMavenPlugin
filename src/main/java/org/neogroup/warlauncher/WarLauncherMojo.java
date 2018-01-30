@@ -25,16 +25,20 @@ import java.util.jar.Manifest;
 @Mojo(name = "repackage", defaultPhase = LifecyclePhase.PACKAGE, requiresProject = true, threadSafe = true, requiresDependencyResolution = ResolutionScope.COMPILE_PLUS_RUNTIME, requiresDependencyCollection = ResolutionScope.COMPILE_PLUS_RUNTIME)
 public class WarLauncherMojo extends AbstractMojo {
 
-    private static final String START_CLASS_ATTRIBUTE_NAME = "Start-Class";
-
     @Parameter(defaultValue = "${project}", readonly = true, required = true)
     private MavenProject project;
 
     @Parameter(defaultValue = "${project.build.directory}", required = true)
     private File buildDirectory;
 
-    @Parameter(property = "startClass", required = true)
+    @Parameter
     private String startClass;
+
+    @Parameter
+    private String webRootAttributeName;
+
+    @Parameter
+    private String warFileAttributeName;
 
     /**
      * Executes the mojo
@@ -51,6 +55,27 @@ public class WarLauncherMojo extends AbstractMojo {
             //Unpack the war file
             WarUtils.unpackWarFile(warFile, tempWarFolderDestinationPath);
 
+            //Create a customized manifest for the war file
+            JarFile jarFile = new JarFile(warFile);
+            Manifest manifest = jarFile.getManifest();
+            String originalMainClass = manifest.getMainAttributes().getValue(Attributes.Name.MAIN_CLASS);
+            manifest.getMainAttributes().put(Attributes.Name.MAIN_CLASS, WarLauncher.class.getName());
+            if (startClass != null) {
+                manifest.getMainAttributes().putValue(WarLauncher.START_CLASS_ATTRIBUTE_NAME, startClass);
+            }
+            else if (originalMainClass != null) {
+                manifest.getMainAttributes().putValue(WarLauncher.START_CLASS_ATTRIBUTE_NAME, originalMainClass);
+            }
+            else {
+                throw new MojoExecutionException("Main-Class not present in manifests and property \"startClass\" is not set !!");
+            }
+            if (webRootAttributeName != null) {
+                manifest.getMainAttributes().putValue(WarLauncher.WEB_ROOT_ATTRIBUTE_NAME, webRootAttributeName);
+            }
+            if (warFileAttributeName != null) {
+                manifest.getMainAttributes().putValue(WarLauncher.WAR_FILE_ATTRIBUTE_NAME, warFileAttributeName);
+            }
+
             //Copy the WarLauncher classes to the war folder
             Path classDestinationPath = tempWarFolderDestinationPath.resolve("org").resolve("neogroup").resolve("warlauncher");
             classDestinationPath.toFile().mkdirs();
@@ -60,12 +85,6 @@ public class WarLauncherMojo extends AbstractMojo {
             try (InputStream inputStream = getClass().getClassLoader().getResourceAsStream("org/neogroup/warlauncher/WarLauncher$1.class"); FileOutputStream outputStream = new FileOutputStream(classDestinationPath.resolve("WarLauncher$1.class").toFile())) {
                 inputStream.transferTo(outputStream);
             }
-
-            //Create a customized manifest for the war file
-            JarFile jarFile = new JarFile(warFile);
-            Manifest manifest = jarFile.getManifest();
-            manifest.getMainAttributes().put(Attributes.Name.MAIN_CLASS, WarLauncher.class.getName());
-            manifest.getMainAttributes().putValue(START_CLASS_ATTRIBUTE_NAME, startClass);
 
             //Delete the original war file
             FileUtils.forceDelete(warFile);
